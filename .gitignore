@@ -1,0 +1,17 @@
+__pycache__/
+
+/dropbear/
+/sshbox_test/
+/litellm/db/
+
+/play/*
+!/play/instance/
+/play/instance/*
+!/play/instance/instance.json
+
+/litellm/.*.env
+!/litellm/.example.env
+/litellm/config_*.yaml
+!/litellm/config_example.yaml
+
+mini-swe-agent/

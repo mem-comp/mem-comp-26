@@ -1,0 +1,64 @@
+# WARNING: This docker-compose.yaml is for your local debugging purpose only.
+# For the final evaluation, you ONLY submit a docker image of your agent, so changes in this file will NOT take effect.
+# Therefore, DO NOT make backward-incompatible changes, e.g., adding new environment variables in this file.
+
+services:
+    agent:
+        restart: no
+        build: .
+        networks:
+            - infra
+        environment:
+            - TZ=Asia/Shanghai
+        volumes:
+            - ../play/instance/:/mnt/instance/
+            - ../play/memory/:/mnt/memory/
+        command:
+            - --instance-path
+            - /mnt/instance
+            - --memory-path
+            - /mnt/memory
+            - --llm-base-url
+            - http://litellm_app:4000
+            - --llm-api-key
+            - sk-FILL-YOUR-LITELLM-KEY-HERE
+            - --env-ssh
+            - root:ssh_Passw0rd@sshbox
+
+        cpu_period: 100000
+        cpu_quota: 600000
+        mem_limit: 12G
+        memswap_limit: 12G
+        pids_limit: 32768
+
+    sshbox:
+        container_name: sshbox
+        restart: no
+        image: jefzda/sweap-images:nodebb.nodebb-NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5
+        networks:
+            - internet
+            - infra
+        ports:
+            - 127.0.0.1:1122:22
+        environment:
+            - TZ=Asia/Shanghai
+        volumes:
+            - ../sshbox_scripts/:/mnt/sshbox/
+            - ../play/pcap/:/mnt/pcap/
+        entrypoint:
+            - /mnt/sshbox/start.sh
+        command:
+            - ssh_Passw0rd
+        dns: 223.5.5.5
+        
+        cpu_period: 100000
+        cpu_quota: 600000
+        mem_limit: 12G
+        memswap_limit: 12G
+        pids_limit: 32768
+
+networks:
+    internet:
+        external: true
+    infra:
+        external: true

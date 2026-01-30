@@ -1,0 +1,41 @@
+model_list:
+  - model_name: glm-4.7
+    litellm_params:
+      model: openai/glm-4.7
+      api_base: https://...
+      api_key: sk-...
+    model_info: # https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
+      "cache_creation_input_token_cost": 0
+      "cache_read_input_token_cost": 1.1e-07
+      "input_cost_per_token": 6e-07
+      "output_cost_per_token": 2.2e-06
+      "max_input_tokens": 200000
+      "max_output_tokens": 128000
+      "mode": "chat"
+      "supports_function_calling": true
+      "supports_reasoning": true
+      "supports_tool_choice": true
+      "supports_native_streaming": true
+
+general_settings:
+  disable_master_key_return: true
+  disable_spend_logs: true
+  disable_error_logs: true
+
+litellm_settings:
+  num_retries: 1
+  request_timeout: 240
+  set_verbose: false
+  callbacks: # should mount into /app
+    - traj_logger.traj_logger_instance
+  global_disable_no_log_param: true
+  allow_dynamic_callback_disabling: false
+
+router_settings:
+  disable_cooldowns: true
+  retry_policy:
+    AuthenticationErrorRetries: 1
+    TimeoutErrorRetries: 5
+    RateLimitErrorRetries: 5
+    ContentPolicyViolationErrorRetries: 0
+    InternalServerErrorRetries: 5 # http status >=500, maybe bad gateway or gateway timeout

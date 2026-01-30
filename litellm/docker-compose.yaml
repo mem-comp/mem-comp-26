@@ -1,0 +1,69 @@
+services:
+    app:
+        container_name: litellm_app
+        restart: unless-stopped
+        image: ghcr.io/berriai/litellm:litellm_stable_release_branch-1.80.15-stable.1
+        networks:
+            - litellm_db
+            - internet
+            - infra
+        ports:
+            - 127.0.0.1:4000:4000
+        depends_on:
+            db:
+                condition: service_started
+                restart: true
+        environment:
+            - TZ=Asia/Shanghai
+            - LITELLM_LOCAL_MODEL_COST_MAP=True
+            - LITELLM_LOG=ERROR
+            - LITELLM_MODE=PRODUCTION
+            - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:?no DB_PASSWORD set}@litellm_db:5432/litellm
+            - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:?no LITELLM_MASTER_KEY set}
+        volumes:
+            - ./${CONFIG_FN:?no CONFIG_FN set}:/app/config.yaml
+            - ./traj_logger.py:/app/traj_logger.py
+            - ./${TRAJ_DIR:?no TRAJ_DIR set}/:/mnt/trajs/
+        command:
+            - --config
+            - /app/config.yaml
+            - --num_workers
+            - "1"
+        dns: 223.5.5.5
+
+    db:
+        container_name: litellm_db
+        restart: unless-stopped
+        image: postgres:18
+        networks:
+            - litellm_db
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=${DB_PASSWORD:?no DB_PASSWORD set}
+            - POSTGRES_DB=litellm
+        volumes:
+            - ./db/:/var/lib/postgresql/
+
+    controller:
+        restart: unless-stopped
+        build: ./controller/
+        networks:
+            - litellm_db
+            - internet # to make port forwarding work
+        ports:
+            - 127.0.0.1:4001:8000
+        environment:
+            - TZ=Asia/Shanghai
+            - LITELLM_BASEURL=http://litellm_app:4000
+            - LITELLM_KEY=${LITELLM_MASTER_KEY:?no LITELLM_MASTER_KEY set}
+            - GLOBAL_BUDGET=200
+            - INSTANCE_BUDGET=2.0
+
+networks:
+    litellm_db:
+        driver: bridge
+        internal: true
+    internet:
+        external: true
+    infra:
+        external: true
