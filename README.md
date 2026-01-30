@@ -1,8 +1,8 @@
 # Competition of Intelligent Coding Assistant Enhanced with Memory
 
-Competition homepage: [mem-comp.github.io](https://mem-comp.github.io/)
+**Links: [Competition website](https://mem-comp.github.io/) / [HotCRP](https://mem-comp26.hotcrp.com/) / [Discord](https://discord.gg/eH6DN82k4u)**
 
-This repository contains a local evaluation harness for the competition. It also includes a modified mini-swe-agent that stores the trajectory of the previous task and prepends it to the user prompt of the next task. This is an EXTREMELY NAIVE memory implementation, but it can serve as an example for you to understand the harness and get started.
+This repository contains a local evaluation harness for the competition. It also includes a modified [mini-swe-agent](https://github.com/SWE-agent/mini-SWE-agent) that stores the trajectory of the finished task and prepends it to the user prompt of the next task. This is an EXTREMELY NAIVE memory implementation, but it can serve as an example for you to understand the harness and get started.
 
 *Details are subject to change. If you have concerns or suggestions, feel free to discuss them with the organizers in the Discord channel.*
 
@@ -34,6 +34,8 @@ In the arguments to your agent:
 
 ## Getting Started
 
+To set up the evaluation harness and test your agent with the default `instance_NodeBB__NodeBB-51d8f3b195bddb13a13ddc0de110722774d9bb1b-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e` task:
+
 1. Use an x86-64 Linux machine with Docker installed
 2. Clone this repository: `git clone https://github.com/mem-comp/mem-comp-26`
 3. Edit `litellm/config_example.yaml` to add LLMs your agent will use ([docs](https://docs.litellm.ai/docs/providers/))
@@ -42,9 +44,9 @@ In the arguments to your agent:
 6. Run `docker compose up --build` in the `agent_example` directory to start your agent
 7. The output and logs will be stored in the `play` directory
 
-To evaluate on another task, you need to:
+To test with another task, you can:
 
-- Edit `play/instance/instance.json` to change the task description, and delete other files in the `play/instance` directory
-- In `agent_example/docker-compose.yaml`, edit the `image` of `sshbox` to the new instance
-- Run `curl http://127.0.0.1:4001/test_key/reset` to get a new key with quota reset, and also update the `--llm-api-key` in `agent_example/docker-compose.yaml` to the new key
-- Run `docker compose up --build` in the `agent_example` directory to start your agent
+1. Edit `play/instance/instance.json` to change the task description, and delete other files in the `play/instance` directory
+2. In `agent_example/docker-compose.yaml`, edit the `image` of `sshbox` to the new instance
+3. Run `curl http://127.0.0.1:4001/test_key/reset` to get a new key with quota reset, and also update the `--llm-api-key` in `agent_example/docker-compose.yaml` to the new key
+4. Run `docker compose up --build` in the `agent_example` directory to start your agent
