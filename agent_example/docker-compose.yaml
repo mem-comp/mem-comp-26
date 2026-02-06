@@ -6,6 +6,7 @@ services:
     agent:
         restart: no
         build: .
+        image: minisweagent-withmem # the agent will be built with this image name
         networks:
             - infra
         environment:
@@ -43,7 +44,7 @@ services:
         environment:
             - TZ=Asia/Shanghai
         volumes:
-            - ../sshbox_scripts/:/mnt/sshbox/
+            - ../sshbox_scripts/:/mnt/sshbox/:ro
             - ../play/pcap/:/mnt/pcap/
         entrypoint:
             - /mnt/sshbox/start.sh

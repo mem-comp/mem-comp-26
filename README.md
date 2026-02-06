@@ -44,9 +44,16 @@ To set up the evaluation harness and test your agent with the default `instance_
 6. Run `docker compose up --build` in the `agent_example` directory to start your agent
 7. The output and logs will be stored in the `play` directory
 
-To test with another task, you can:
+To test with another task manually, you can:
 
 1. Edit `play/instance/instance.json` to change the task description, and delete other files in the `play/instance` directory
 2. In `agent_example/docker-compose.yaml`, edit the `image` of `sshbox` to the new instance
 3. Run `curl http://127.0.0.1:4001/test_key/reset` to get a new key with quota reset, and also update the `--llm-api-key` in `agent_example/docker-compose.yaml` to the new key
 4. Run `docker compose up --build` in the `agent_example` directory to start your agent
+
+To run an automated batch evaluation, you can use our harness script:
+
+1. Edit `harness/candidates.json` to add your agent, and edit `harness/projects.json` to list the tasks to evaluate with
+2. Run `cd harness; python3 -m pip install -r requirements.txt`
+3. Run `sudo -E python3 main.py` in the harness directory to start the evaluation
+4. The results will be stored in the `results` directory

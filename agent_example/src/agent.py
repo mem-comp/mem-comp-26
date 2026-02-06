@@ -30,6 +30,9 @@ class MemoryAgent(DefaultAgent):
             json.dump(self.messages[1:], f, indent=2)
 
     def print_spend(self) -> None:
+        # NOTE: spend info is updated asynchronously in litellm, and can be stale for 2~30 seconds
+        # see https://github.com/BerriAI/litellm/blob/d07c87860db91c7bbf5a051d1cf82857432bf856/litellm/proxy/utils.py#L3874
+
         u = self.model.config.model_kwargs['api_base']
         h = {'Authorization': f'Bearer {self.model.config.model_kwargs["api_key"]}'}
 

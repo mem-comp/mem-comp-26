@@ -30,6 +30,8 @@ def main():
         task += f'\n\nNew interfaces introduced:\n{instance["interface"]}'
     task += f'\n\nThe {instance["repo_language"]} project "{instance["repo"]}" has been cloned to {config["environment"]["cwd"]}'
 
+    print('agent started!')
+
     agent = MemoryAgent(
         args.memory_path,
         LitellmModel(
@@ -69,4 +71,9 @@ def main():
         print(result)
 
 if __name__ == "__main__":
+    # forward SIGTERM from `docker stop` to Python exception
+    import signal
+    import sys
+    signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit(-sig))
+
     main()

@@ -1,0 +1,18 @@
+[
+    {
+        "run_name": "mini_baseline",
+        "agent_docker_image": "minisweagent-withmem:latest",
+        "llm_quota_total": 200,
+        "llm_quota_instance": 2,
+        "enable_memory": false,
+        "timeout_s": 7200
+    },
+    {
+        "run_name": "mini_mem",
+        "agent_docker_image": "minisweagent-withmem:latest",
+        "llm_quota_total": 200,
+        "llm_quota_instance": 2,
+        "enable_memory": true,
+        "timeout_s": 7200
+    }
+]
