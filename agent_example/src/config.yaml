@@ -241,4 +241,4 @@ environment:
     TQDM_DISABLE: '1'
 
 model:
-  model_name: "litellm_proxy/gemini-3-pro-preview"
+  model_name: "litellm_proxy/glm-4.7"

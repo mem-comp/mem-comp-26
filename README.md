@@ -32,28 +32,44 @@ In the arguments to your agent:
 
 `--env-ssh` points to an SSH environment for the task. Your agent can access the cloned project at `/app` and execute commands in this environment. Note that unlike traditional SWE agents that spawn Docker containers themselves, your agent should instead use the SSH environment. The SSH environment will log all network traffic, including executed commands.
 
-## Getting Started
+## Harness Usage
 
-To set up the evaluation harness and test your agent with the default `instance_NodeBB__NodeBB-51d8f3b195bddb13a13ddc0de110722774d9bb1b-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e` task:
+### Setup and Manual Evaluation
 
-1. Use an x86-64 Linux machine with Docker installed
-2. Clone this repository: `git clone https://github.com/mem-comp/mem-comp-26`
-3. Edit `litellm/config_example.yaml` to add LLMs your agent will use ([docs](https://docs.litellm.ai/docs/providers/))
-4. Run `sudo ./init.sh` to start the LLM service in background and create a test key
-5. Edit `agent_example/docker-compose.yaml` to fill in the key after `--llm-api-key`
-6. Run `docker compose up --build` in the `agent_example` directory to start your agent
-7. The output and logs will be stored in the `play` directory
+You will need an x86-64 Linux machine with Docker installed for running the evaluation harness.
+
+To set up the evaluation harness and test your agent with the default task (`instance_NodeBB__NodeBB-51d8f3b195bddb13a13ddc0de110722774d9bb1b-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e`):
+
+1. Clone this repository:
+   - Run `git clone https://github.com/mem-comp/mem-comp-26 && cd mem-comp-26`
+2. Configure and start the LLM service:
+   - Edit `litellm/config_example.yaml` to add the LLM your agent will use ([docs](https://docs.litellm.ai/docs/providers/))
+   - Run `sudo ./init.sh` to start the LLM service in background and create a test key
+3. Configure your agent (using the provided mini-swe-agent as an example):
+   - Edit `agent_example/docker-compose.yaml` to fill in your test key after `--llm-api-key`
+   - Edit `agent_example/src/config.yaml` to fill in the model name (as configured in LiteLLM) after `model_name:`
+4. Start evaluation:
+   - Run `docker compose up --build` in the `agent_example` directory to start your agent
+   - The patch and logs will be stored in the `play` directory
+   - If you want to judge the correctness of the patch, refer to [SWE-Bench-Pro](https://github.com/scaleapi/SWE-bench_Pro-os)
 
 To test with another task manually, you can:
 
-1. Edit `play/instance/instance.json` to change the task description, and delete other files in the `play/instance` directory
-2. In `agent_example/docker-compose.yaml`, edit the `image` of `sshbox` to the new instance
-3. Run `curl http://127.0.0.1:4001/test_key/reset` to get a new key with quota reset, and also update the `--llm-api-key` in `agent_example/docker-compose.yaml` to the new key
-4. Run `docker compose up --build` in the `agent_example` directory to start your agent
+1. Update the task input:
+   - Edit `play/instance/instance.json` to change the task description
+   - Delete other files in the `play/instance` directory
+   - In `agent_example/docker-compose.yaml`, edit the `image` of `sshbox` to the new instance
+2. Reset LLM quota:
+   - Run `curl http://127.0.0.1:4001/test_key/reset` to get a new key with quota reset
+   - Update the `--llm-api-key` in `agent_example/docker-compose.yaml` to the new key
+3. Start evaluation
+
+### Automated Evaluation
 
 To run an automated batch evaluation, you can use our harness script:
 
-1. Edit `harness/candidates.json` to add your agent, and edit `harness/projects.json` to list the tasks to evaluate with
-2. Run `cd harness; python3 -m pip install -r requirements.txt`
-3. Run `sudo -E python3 main.py` in the harness directory to start the evaluation
-4. The results will be stored in the `results` directory
+1. Edit `harness/candidates.json` to add your agent
+2. Edit `harness/projects.json` to list the tasks to evaluate with
+3. Run `cd harness; python3 -m pip install -r requirements.txt`
+4. Run `sudo -E python3 main.py` in the `harness` directory to start the evaluation
+5. The results will be stored in the `results` directory
