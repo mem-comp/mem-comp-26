@@ -1,18 +1,80 @@
-model_list:
+model_list: # https://docs.litellm.ai/docs/providers/ https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
+  - model_name: gpt-5.2
+    litellm_params:
+      model: openai/xxxxxx
+      api_base: https://xxxxxx.example.com
+      api_key: sk-xxxxxx
+    model_info:
+      "cache_creation_input_token_cost": 0
+      "cache_read_input_token_cost": 1.75e-07
+      "input_cost_per_token": 1.75e-06
+      "output_cost_per_token": 1.4e-05
+      "max_input_tokens": 272000
+      "max_output_tokens": 128000
+      "max_tokens": 128000
+      "mode": "chat"
+      "supports_function_calling": true
+      "supports_prompt_caching": true
+      "supports_reasoning": true
+      "supports_tool_choice": true
+      "supports_native_streaming": true
+
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      model: openai/xxxxxx
+      api_base: https://xxxxxx.example.com
+      api_key: sk-xxxxxx
+    model_info:
+      "cache_creation_input_token_cost": 0
+      "cache_read_input_token_cost": 1.25e-07
+      "input_cost_per_token": 1.25e-06
+      "output_cost_per_token": 1e-05
+      "max_input_tokens": 1048576
+      "max_output_tokens": 65535
+      "max_tokens": 65535
+      "mode": "chat"
+      "supports_function_calling": true
+      "supports_prompt_caching": true
+      "supports_reasoning": true
+      "supports_tool_choice": true
+      "supports_native_streaming": true
+
   - model_name: glm-4.7
     litellm_params:
-      model: openai/glm-4.7
-      api_base: https://...
-      api_key: sk-...
-    model_info: # https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
+      model: openai/xxxxxx
+      api_base: https://xxxxxx.example.com
+      api_key: sk-xxxxxx
+    model_info:
       "cache_creation_input_token_cost": 0
       "cache_read_input_token_cost": 1.1e-07
       "input_cost_per_token": 6e-07
       "output_cost_per_token": 2.2e-06
       "max_input_tokens": 200000
       "max_output_tokens": 128000
+      "max_tokens": 128000
       "mode": "chat"
       "supports_function_calling": true
+      "supports_prompt_caching": true
+      "supports_reasoning": true
+      "supports_tool_choice": true
+      "supports_native_streaming": true
+
+  - model_name: deepseek-v3.2
+    litellm_params:
+      model: openai/xxxxxx
+      api_base: https://xxxxxx.example.com
+      api_key: sk-xxxxxx
+    model_info:
+      "cache_creation_input_token_cost": 0
+      "input_cost_per_token_cache_hit": 2.8e-08
+      "input_cost_per_token": 2.8e-07
+      "output_cost_per_token": 4.2e-07
+      "max_input_tokens": 163840
+      "max_output_tokens": 163840
+      "max_tokens": 163840
+      "mode": "chat"
+      "supports_function_calling": true
+      "supports_prompt_caching": true
       "supports_reasoning": true
       "supports_tool_choice": true
       "supports_native_streaming": true
