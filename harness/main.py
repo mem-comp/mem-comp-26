@@ -50,35 +50,10 @@ DOCKER_LIMITS = {
     'environment': ['TZ=Asia/Shanghai'],
 }
 
-### BEGIN copied from sweap
-
-def sweap_get_docker_tag(row):
-    uid = row['instance_id']
-    repo_name = row.get('repo', '')
-    repo_base, repo_name_only = repo_name.lower().split("/")
-    hsh = uid.replace("instance_", "")
-
-    if uid == "instance_element-hq__element-web-ec0f940ef0e8e3b61078f145f34dc40d1938e6c5-vnan":
-        repo_name_only = 'element-web'  # Keep full name for this one case
-    elif 'element-hq' in repo_name.lower() and 'element-web' in repo_name.lower():
-        repo_name_only = 'element'
-        if hsh.endswith('-vnan'):
-            hsh = hsh[:-5]
-    # All other repos: strip -vnan suffix
-    elif hsh.endswith('-vnan'):
-        hsh = hsh[:-5]
-
-    tag = f"{repo_base}.{repo_name_only}-{hsh}"
-    if len(tag) > 128:
-        tag = tag[:128]
-    return tag
-
-### END copied from sweap
-
 def ts():
     return datetime.datetime.now().isoformat()
 
-sweap_df = pd.read_csv('external_hf_v2.csv', engine='c', on_bad_lines='skip')
+sweap_df = pd.read_parquet('swebench-pro.parquet')
 sweap_df = sweap_df.set_index('instance_id', drop=False)
 
 class Instance:
@@ -88,7 +63,7 @@ class Instance:
         self.instance_id: str = instance_id
         self.ident: str = ident # used as llm key name
         self.instance: pd.Series = sweap_df.loc[instance_id]
-        self.env_docker_image: str = f'{self.DOCKER_IMAGE_BASE}:{sweap_get_docker_tag(self.instance)}'
+        self.env_docker_image: str = f'{self.DOCKER_IMAGE_BASE}:{self.instance["dockerhub_tag"]}'
         self.instance_input: dict[str, str] = {
             k: self.instance[k]
             for k in ['repo', 'repo_language', 'problem_statement', 'requirements', 'interface']
@@ -495,7 +470,7 @@ if __name__ == '__main__':
             images.append(c['agent_docker_image'])
         for p in projects:
             for i in p:
-                images.append(f'{Instance.DOCKER_IMAGE_BASE}:{sweap_get_docker_tag(sweap_df.loc[i])}')
+                images.append(f'{Instance.DOCKER_IMAGE_BASE}:{sweap_df.loc[i]["dockerhub_tag"]}')
         
         for image in images:
             try:
