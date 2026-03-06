@@ -26,6 +26,7 @@ EVAL_TIMEOUT_S = 1200
 RESULT_PATH = Path("results") 
 DOCKER_IMAGE_BASE = os.environ.get('DOCKER_IMAGE_BASE', 'jefzda/sweap-images')
 FILE_OWNER_UID = getpwnam(os.getenv('FILE_OWNER', 'root')).pw_uid
+ROOTFS_DEVICE = os.getenv('ROOTFS_DEVICE', '/dev/sda')
 
 
 def ts():
@@ -285,12 +286,12 @@ def eval_with_docker(patch, sample, output_dir, prefix="", redo=False, block_net
             "cpu_quota": 100000 * 6,
             "mem_limit": '12g',
             "memswap_limit": '12g',
-            "device_read_bps": [{"Path": "/dev/vdb", "Rate": 35*1024*1024}],
-            "device_write_bps": [{"Path": "/dev/vdb", "Rate": 30*1024*1024}],
-            "device_read_iops": [{"Path": "/dev/vdb", "Rate": 2000}],
-            "device_write_iops": [{"Path": "/dev/vdb", "Rate": 2000}],
+            "device_read_bps": [{"Path": ROOTFS_DEVICE, "Rate": 30*1024*1024}],
+            "device_write_bps": [{"Path": ROOTFS_DEVICE, "Rate": 30*1024*1024}],
+            "device_read_iops": [{"Path": ROOTFS_DEVICE, "Rate": 2000}],
+            "device_write_iops": [{"Path": ROOTFS_DEVICE, "Rate": 2000}],
             "blkio_weight": 300,
-            "pids_limit": 16384,
+            "pids_limit": 32768,
         }
         if block_network:
             run_kwargs["network_mode"] = "none"
