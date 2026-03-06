@@ -19,6 +19,8 @@ from pwd import getpwnam
 from dotenv import load_dotenv
 from typing import Callable
 
+import validation
+
 load_dotenv()
 
 if os.geteuid() != 0:
@@ -244,6 +246,7 @@ def eval_single_project(instances: list[Instance], candidate: Candidate):
     try:
         for instance in instances:
             print(f'{ts()} | {candidate.run_name} {instance.ident}: INIT')
+            verdict = {'instance_id': instance.instance_id}
 
             # create memory path
             if not candidate.enable_memory:
@@ -255,6 +258,8 @@ def eval_single_project(instances: list[Instance], candidate: Candidate):
             if inst_path.exists():
                 shutil.rmtree(inst_path, ignore_errors=True)
             inst_path.mkdir(parents=True)
+            os.chown(inst_path, uid=FILE_OWNER_UID, gid=FILE_OWNER_UID, follow_symlinks=False)
+            os.chown(inst_path.parent, uid=FILE_OWNER_UID, gid=FILE_OWNER_UID, follow_symlinks=False)
 
             def perform_cleanup(log_dir: Workdir):
                 # collect memory snapshot
@@ -315,6 +320,7 @@ def eval_single_project(instances: list[Instance], candidate: Candidate):
 
                     print(f'{ts()} | {candidate.run_name} {instance.ident}: START')
                     logf.write(f'start running agent @ {ts()}\n')
+                    verdict['ts_begin'] = ts()
                     
                     with agent_scope(inst_path, mem_dir.path, llm_key, sshbox_conn_str, log_dir.path / 'agent.log') as cont:
                         try:
@@ -324,16 +330,21 @@ def eval_single_project(instances: list[Instance], candidate: Candidate):
                                 print(f'{ts()} | {candidate.run_name} {instance.ident}: agent timeout: {repr(e)}')
                             
                             logf.write(f'agent timeout:\n{traceback.format_exc()}\n')
+                            verdict['status'] = 'timeout'
                         else:
                             if VERBOSE >= 1:
                                 print(f'{ts()} | {candidate.run_name} {instance.ident}: agent ret = {agent_ret}')
 
                             logf.write(f'agent finished: retcode = {agent_ret["StatusCode"]}\n')
+                            verdict['status'] = agent_ret
 
                         logf.write(f'stop running agent @ {ts()}\n')
+                        verdict['ts_end'] = ts()
 
                     print(f'{ts()} | {candidate.run_name} {instance.ident}: FIN')
                     logf.write(f'agent removed @ {ts()}\n')
+
+                    time.sleep(1)
 
                     # query llm usage
 
@@ -346,10 +357,9 @@ def eval_single_project(instances: list[Instance], candidate: Candidate):
                         print(f'{ts()} | {candidate.run_name} {instance.ident}: llm usage = {usage}')
 
                     logf.write(f'llm usage: {usage}\n')
+                    verdict['llm_usage'] = usage
 
                 # when the context manager exits: llm key will be deleted, sshbox will be removed, logf will be flushed
-
-                time.sleep(1)
 
                 # collect litellm traj
 
@@ -361,6 +371,11 @@ def eval_single_project(instances: list[Instance], candidate: Candidate):
                 else:
                     if VERBOSE >= 1:
                         print(f'{ts()} | {candidate.run_name} {instance.ident}: traj dir not found')
+
+                # save verdict
+
+                with (log_dir.path / 'verdict_gen.json').open('w') as f:
+                    json.dump(verdict, f, indent=4)
 
             # when the context manager exits: log_dir will be cleaned up
 
@@ -485,3 +500,5 @@ if __name__ == '__main__':
     for c in candidates:
         eval_candidate(projects, Candidate(**c))
     print(f'{ts()} | done')
+
+    validation.main()

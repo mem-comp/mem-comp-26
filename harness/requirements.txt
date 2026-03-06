@@ -3,3 +3,4 @@ docker
 requests
 python-dotenv
 psutil
+tqdm
