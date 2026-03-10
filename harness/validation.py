@@ -101,7 +101,7 @@ cd /app
 git reset --hard {base_commit}
 git checkout {base_commit}
 echo === apply patch === $(date -Iseconds)
-git apply -v --ignore-space-change --ignore-whitespace --inaccurate-eof --reject /workspace/patch.diff
+git apply -v --ignore-space-change --ignore-whitespace --reject /workspace/patch.diff
 echo === applied diff === $(date -Iseconds)
 git diff
 echo === run test === $(date -Iseconds)
