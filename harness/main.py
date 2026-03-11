@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import pandas as pd
 from pathlib import Path
 import shutil
@@ -79,6 +79,7 @@ class Candidate:
     llm_quota_instance: float
     enable_memory: bool
     timeout_s: float
+    env: dict[str, str] = field(default_factory=dict)
 
 class Workdir:
     def __init__(self, stem: str, cleanup_fn: Callable[['Workdir'], None] | None = None):
@@ -185,6 +186,10 @@ def eval_single_project(instances: list[Instance], candidate: Candidate):
 
     @contextmanager
     def agent_scope(inst_path: Path, mem_path: Path, llm_key: str, ssh_conn_str: str, log_path: Path):
+        limit = {**DOCKER_LIMITS}
+        for env_k, env_v in candidate.env.items():
+            limit['environment'].append(f'{env_k}={env_v}')
+        
         cont = docker_client.containers.create(
             candidate.agent_docker_image,
             [
@@ -202,7 +207,7 @@ def eval_single_project(instances: list[Instance], candidate: Candidate):
                 str(inst_path.resolve()): {'bind': '/mnt/instance', 'mode': 'rw'},
                 str(mem_path.resolve()): {'bind': '/mnt/memory', 'mode': 'rw'},
             },
-            **DOCKER_LIMITS,
+            **limit,
         )
         
         def log_thread():

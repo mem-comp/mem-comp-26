@@ -1,6 +1,7 @@
 import argparse
 import yaml
 import json
+import os
 from minisweagent.models.litellm_model import LitellmModel
 
 from env import SshEnvironment
@@ -30,12 +31,14 @@ def main():
         task += f'\n\nNew interfaces introduced:\n{instance["interface"]}'
     task += f'\n\nThe {instance["repo_language"]} project "{instance["repo"]}" has been cloned to {config["environment"]["cwd"]}'
 
-    print('agent started!')
+    model_name = os.environ.get('MODEL_NAME', config['model']['model_name'])
+
+    print('agent started!', model_name)
 
     agent = MemoryAgent(
         args.memory_path,
         LitellmModel(
-            model_name=config['model']['model_name'],
+            model_name=model_name,
             model_kwargs={
                 'api_base': args.llm_base_url,
                 'api_key': args.llm_api_key,
