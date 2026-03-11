@@ -4,8 +4,6 @@
 
 This repository contains a local evaluation harness for the competition. It also includes a modified [mini-swe-agent](https://github.com/SWE-agent/mini-SWE-agent) that stores the trajectory of the finished task and prepends it to the user prompt of the next task. This is an EXTREMELY NAIVE memory implementation, but it can serve as an example for you to understand the harness and get started.
 
-*Details are subject to change. If you have concerns or suggestions, feel free to discuss them with the organizers in the Discord channel.*
-
 ## Input & Output Format
 
 Your task is to implement a memory-enhanced SWE agent system as a Docker image. The memory component may be implemented using any suitable approach. We will invoke your agent for each task with a Docker command like this:
@@ -24,13 +22,13 @@ docker run --rm
 
 In the arguments to your agent:
 
-`--instance-path` is a path to the task instance. Your agent reads the task description in `instance.json` ([example](play/instance/instance.json)) and outputs the patch to `patch.diff` in this directory. It can also output debug information by writing to other files in this directory.
+`--instance-path` points to a directory for the task instance. Your agent reads the task description in `instance.json` ([example](play/instance/instance.json)) and outputs the patch to `patch.diff` in this directory. It can also output debug information by writing to other files in this directory. Files in this directory won't preserve between tasks.
 
-`--memory-path` is where your agent stores and reads the memory. We will invoke your agent sequentially for each task in the same project, and this is the only directory that will be preserved between different tasks. It will be empty at the beginning, and your agent can store memory in any format.
+`--memory-path` points to a directory where your agent stores and reads the memory. We will invoke your agent sequentially for each task in the same project, and files in this directory will be preserved between tasks in a project (but not between projects). The directory will be empty at the beginning, and your agent can store memory in any format.
 
 `--llm-base-url` specifies the base URL for an OpenAI-compatible LLM service (based on [LiteLLM proxy](https://docs.litellm.ai/docs/proxy/docker_quick_start)). Your agent can only use LLMs provided by this service with the given API key (`--llm-api-key`). This service will log all requests from your agent, and limit the quota for each task.
 
-`--env-ssh` points to an SSH environment for the task. Your agent can access the cloned project at `/app` and execute commands in this environment. Note that unlike traditional SWE agents that spawn Docker containers themselves, your agent should instead use the SSH environment. The SSH environment will log all network traffic, including executed commands.
+`--env-ssh` points to an SSH environment for the task. Your agent can access the project cloned at `/app` and execute commands in this environment. Note that unlike traditional SWE agents that spawn Docker containers themselves, your agent should instead use the SSH environment. The SSH environment will log all network traffic, including the executed commands.
 
 ## Harness Usage
 
@@ -73,3 +71,17 @@ To run an automated batch evaluation, you can use our harness script:
 3. Run `cd harness; python3 -m pip install -r requirements.txt`
 4. Run `sudo -E python3 main.py` in the `harness` directory to start the evaluation
 5. The results will be stored in the `results` directory
+
+### Submission
+
+You should make the Docker image of your agent available to the reviewers. A common approach is to [publish it on DockerHub](https://docs.docker.com/get-started/docker-concepts/building-images/build-tag-and-publish-an-image/).
+
+The `agent_example`  directory builds the agent with the tag `minisweagent-withmem` by default. You can publish the built image with commands like these:
+
+```bash
+docker login
+docker image tag minisweagent-withmem YOUR_DOCKER_USERNAME_HERE/APPROACH_NAME_HERE:v1
+docker push YOUR_DOCKER_USERNAME_HERE/APPROACH_NAME_HERE:v1
+```
+
+The `docker push` command will output the digest of your image  (`digest: sha256:...`). Please provide your full image name, tag, and digest (e.g., `YOUR_DOCKER_USERNAME_HERE/APPROACH_NAME_HERE:v1@sha256:...`) in the "System Submission" field on HotCRP.
